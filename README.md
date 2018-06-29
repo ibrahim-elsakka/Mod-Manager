@@ -1,5 +1,5 @@
 # Mod Manager
 
-![](https://s31.postimg.org/f27s47caz/image.png)
+![Imgur](https://i.imgur.com/XIC9HDK.png)
 
-More info coming soon :)
+[View Website](https://coltonon.cc/cmods)
