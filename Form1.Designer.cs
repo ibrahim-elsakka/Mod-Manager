@@ -881,7 +881,8 @@
             this.materialLabel2.Name = "materialLabel2";
             this.materialLabel2.Size = new System.Drawing.Size(1006, 84);
             this.materialLabel2.TabIndex = 0;
-            this.materialLabel2.Text = "Mod Manager by Coltonon\r\nThanks to Galaxyman2015 and Dangercat";
+            this.materialLabel2.Text = "Mod Manager by Coltonon\r\nThanks to Galaxyman2015 and Dangercat\r\nOther dudes who h" +
+    "elped: Cade, Dulana57, CosmiNightmare\r\n";
             // 
             // tabPage7
             // 
@@ -1013,8 +1014,8 @@
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.tableLayoutPanel5.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Absolute, 150F));
-            this.tableLayoutPanel5.Controls.Add(this.materialLabel3, 0, 0);
             this.tableLayoutPanel5.Controls.Add(this.showAdvancedCheckBox, 3, 0);
+            this.tableLayoutPanel5.Controls.Add(this.materialLabel3, 2, 0);
             this.tableLayoutPanel5.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel5.Location = new System.Drawing.Point(3, 599);
             this.tableLayoutPanel5.Name = "tableLayoutPanel5";
@@ -1076,13 +1077,13 @@
             this.VersionNumberLable.BackColor = System.Drawing.Color.Transparent;
             this.VersionNumberLable.Depth = 0;
             this.VersionNumberLable.Font = new System.Drawing.Font("Roboto", 11F);
-            this.VersionNumberLable.ForeColor = System.Drawing.Color.FromArgb(((int)(((byte)(222)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))), ((int)(((byte)(0)))));
+            this.VersionNumberLable.ForeColor = System.Drawing.Color.White;
             this.VersionNumberLable.Location = new System.Drawing.Point(15, 2);
             this.VersionNumberLable.MouseState = MaterialSkin.MouseState.HOVER;
             this.VersionNumberLable.Name = "VersionNumberLable";
-            this.VersionNumberLable.Size = new System.Drawing.Size(44, 19);
+            this.VersionNumberLable.Size = new System.Drawing.Size(36, 19);
             this.VersionNumberLable.TabIndex = 13;
-            this.VersionNumberLable.Text = "v2.0a";
+            this.VersionNumberLable.Text = "v2.3";
             // 
             // Form1
             // 

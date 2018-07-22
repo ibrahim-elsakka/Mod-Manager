@@ -29,6 +29,22 @@ namespace Mod_Manager
             Console.SetOut(controlWriter);
 
 
+            //  Process p = OtherUtils.GetParent(Process.GetCurrentProcess());
+            //   Console.WriteLine(p.MainModule.FileName + "\t\t" + GetMD5(p.MainModule.FileName));
+            //  Console.WriteLine(Process.GetCurrentProcess().GetParent().MainModule.FileName);
+
+            Process parentProc = ProcessExtensions.ParentProcessUtilities.GetParentProcess();
+
+            if (parentProc != null)
+            {
+                if (parentProc.MainModule.FileName.ToLower().Contains("explorer"))
+                {
+                    MessageBox.Show("Startup Error, Run the \"Mod Manager.exe\" file to start.");
+                    Environment.Exit(1);
+                    Application.Exit();
+                }
+            } 
+
             darkThemeCheckBox.Checked = Properties.Settings.Default.darktheme;
             systemThemeRadioButton.Checked = Properties.Settings.Default.windowstheme;
             DllInjectTextBox.Text = Properties.Settings.Default.dllpath;
@@ -61,10 +77,10 @@ namespace Mod_Manager
             WebClient wc = new WebClient();
             wc.DownloadStringCompleted += (a, b) =>
              {
-                 if (float.Parse(b.Result) < float.Parse(VersionNumberLable.Text.Substring(1).TrimEnd('a')))
+                 if (float.Parse(b.Result) > float.Parse(VersionNumberLable.Text.Substring(1).TrimEnd('a')))
                  {
                      Console.WriteLine(b.Result);
-                     MessageBox.Show("Update required, coltonon.cc");
+                     MessageBox.Show("Update required, visit coltonon.cc");
                      Environment.Exit(1);
                      Application.Exit();
                  }
@@ -74,7 +90,6 @@ namespace Mod_Manager
 
 
             //
-            ReColor();
 
             /*  ColorScheme scheme = new ColorScheme(
                   ColorTranslator.FromHtml("#482880"),    // Primary
@@ -83,7 +98,8 @@ namespace Mod_Manager
                   ColorTranslator.FromHtml("#ffbb40"),    // Accent
                   TextShade.WHITE, MaterialSkinManager.Instance.GetApplicationBackgroundColor());*/
 
-           
+            ReColor();
+
 
             materialListView1.BackColor =  moduleListView.BackColor = MaterialSkinManager.Instance.GetApplicationBackgroundColor();
             richTextBox1.BackColor = MaterialSkinManager.Instance.GetApplicationBackgroundColor();
@@ -96,7 +112,7 @@ namespace Mod_Manager
             richTextBox2.ForeColor = MaterialSkinManager.Instance.ColorScheme.AccentColor;
             gracias.ForeColor = MaterialSkinManager.Instance.GetPrimaryTextColor();
             groupBox1.ForeColor = groupBox2.ForeColor = MaterialSkinManager.Instance.GetPrimaryTextColor();
-           VersionNumberLable.ForeColor = MaterialSkinManager.Instance.ColorScheme.TextColor;
+           VersionNumberLable.ForeColor = MaterialSkinManager.Instance.ColorScheme.AccentColor;
 
             materialListView1.Columns.Add("Mod", 150);
             materialListView1.Columns.Add("Description", 300);
@@ -270,6 +286,10 @@ namespace Mod_Manager
                                 Verified = null;
                             }
                         }
+
+                        litem.SubItems[0].ForeColor = moddescription.ForeColor;
+                        litem.SubItems[1].ForeColor = moddescription.ForeColor;
+
                         if (Verified == true)
                         {
                             litem.SubItems[2].Text = "Installed";
@@ -284,7 +304,7 @@ namespace Mod_Manager
                         if (Verified == null)
                         {
                             litem.SubItems[2].Text = "Not Installed";
-                            litem.SubItems[2].ForeColor = MaterialSkinManager.Instance.ColorScheme.TextColor;
+                            litem.SubItems[2].ForeColor = moddescription.ForeColor;
 
                         }
                     }
@@ -355,20 +375,36 @@ namespace Mod_Manager
             client.DownloadStringCompleted += (s, ev) =>
             {
                 Console.WriteLine(gameDirTextBox.Text + "amd_ags_x64.dll");
-                string[] outstr = ev.Result.Split(';');
+                string[] outstr = ev.Result.Split(';'); // original:modified
                 Console.WriteLine("Download Complete");
+
+                //if an update occured
+                if (File.Exists(gameDirTextBox.Text + "ori_amd_ags_x64.dll"))
+                {
+                    Console.WriteLine("Proxied DLL found, Checking MD5");
+                    if (GetMD5(gameDirTextBox.Text + "ori_amd_ags_x64.dll").ToUpper() != outstr[0]) // original
+                    {
+                        Console.WriteLine("MD5 Mismatch, Deleting Proxied DLL");
+                        File.Delete(gameDirTextBox.Text + "ori_amd_ags_x64.dll");
+                    }
+                }
+
+
                 if (File.Exists(gameDirTextBox.Text + "amd_ags_x64.dll"))
                 {
                     Console.WriteLine(GetMD5(gameDirTextBox.Text + "amd_ags_x64.dll").ToUpper());
                     Console.WriteLine(outstr[0]);
+
                     if (GetMD5(gameDirTextBox.Text + "amd_ags_x64.dll").ToUpper() == outstr[0]) // original
                     {
-                        Console.WriteLine("True");
+                        Console.WriteLine("Original DLL found");
+                        Console.WriteLine("Duplicating Original DLL");
                         File.Copy(gameDirTextBox.Text + "amd_ags_x64.dll", gameDirTextBox.Text + "ori_amd_ags_x64.dll");
+                        Console.WriteLine("Deleting Original DLL");
                         File.Delete(gameDirTextBox.Text + "amd_ags_x64.dll");
-                        client.DownloadFile("https://coltonon.cc/cmods/amd_ags_x64.dll", gameDirTextBox.Text + "amd_ags_x64.dll");
                         Console.WriteLine("Downloading Proxy File");
-                    }
+                        client.DownloadFile("https://coltonon.cc/cmods/amd_ags_x64.dll", gameDirTextBox.Text + "amd_ags_x64.dll");
+                    } 
 
                     if (GetMD5(gameDirTextBox.Text + "amd_ags_x64.dll").ToUpper() == outstr[1]) // proxied
                     {
@@ -822,7 +858,7 @@ namespace Mod_Manager
 
         private void ReColor()
         {
-            MaterialSkinManager.Instance.Theme = (darkThemeCheckBox.Checked) ? MaterialSkinManager.Themes.DARK : MaterialSkinManager.Themes.LIGHT ;
+            MaterialSkinManager.Instance.Theme = (Properties.Settings.Default.darktheme) ? MaterialSkinManager.Themes.DARK : MaterialSkinManager.Themes.LIGHT ;
 
             if (purpleThemeRadioButton.Checked)
             {
@@ -975,6 +1011,10 @@ namespace Mod_Manager
         {
             Process.Start("https://coltonon.cc");
         }
+
+
+        
+
     }
 
     public class ControlWriter : TextWriter
@@ -1024,6 +1064,68 @@ namespace Mod_Manager
                 (byte)((0x0000FF00 & colorSetEx) >> 8), (byte)((0x00FF0000 & colorSetEx) >> 16));
 
             return colour;
+        }
+    }
+
+    public static class ProcessExtensions
+    {
+        [StructLayout(LayoutKind.Sequential)]
+        public struct ParentProcessUtilities
+        {
+            // These members must match PROCESS_BASIC_INFORMATION
+            internal IntPtr Reserved1;
+            internal IntPtr PebBaseAddress;
+            internal IntPtr Reserved2_0;
+            internal IntPtr Reserved2_1;
+            internal IntPtr UniqueProcessId;
+            internal IntPtr InheritedFromUniqueProcessId;
+
+            [DllImport("ntdll.dll")]
+            private static extern int NtQueryInformationProcess(IntPtr processHandle, int processInformationClass, ref ParentProcessUtilities processInformation, int processInformationLength, out int returnLength);
+
+            /// <summary>
+            /// Gets the parent process of the current process.
+            /// </summary>
+            /// <returns>An instance of the Process class.</returns>
+            public static Process GetParentProcess()
+            {
+                return GetParentProcess(Process.GetCurrentProcess().Handle);
+            }
+
+            /// <summary>
+            /// Gets the parent process of specified process.
+            /// </summary>
+            /// <param name="id">The process id.</param>
+            /// <returns>An instance of the Process class.</returns>
+            public static Process GetParentProcess(int id)
+            {
+                Process process = Process.GetProcessById(id);
+                return GetParentProcess(process.Handle);
+            }
+
+            /// <summary>
+            /// Gets the parent process of a specified process.
+            /// </summary>
+            /// <param name="handle">The process handle.</param>
+            /// <returns>An instance of the Process class.</returns>
+            public static Process GetParentProcess(IntPtr handle)
+            {
+                ParentProcessUtilities pbi = new ParentProcessUtilities();
+                int returnLength;
+                int status = NtQueryInformationProcess(handle, 0, ref pbi, Marshal.SizeOf(pbi), out returnLength);
+                if (status != 0)
+                    throw new Win32Exception(status);
+
+                try
+                {
+                    return Process.GetProcessById(pbi.InheritedFromUniqueProcessId.ToInt32());
+                }
+                catch (ArgumentException)
+                {
+                    // not found
+                    return null;
+                }
+            }
         }
     }
 }
